@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forkhead Yazar Paneli</title>
+    <title>Mr. Forkhead Yazar Paneli</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #fff; margin: 0; padding: 10px; color: #333; }
         .header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #ff9800; padding-bottom: 10px; }
         h2 { margin: 5px 0; color: #1a1a1a; font-size: 1.2rem; }
+        
+        /* Büyük toplam skor tabelası */
+        .toplam-kutu {
+            background-color: #0A1128;
+            color: #ffa000;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; font-size: 11px; }
         th, td { border: 1px solid #ddd; padding: 8px 4px; text-align: center; word-break: break-word; }
         th { background-color: #1a1a1a; color: white; font-weight: bold; }
@@ -17,6 +31,10 @@
     </style>
 </head>
 <body>
+    </div>
+    
+    <div id="toplam-alani"></div>
+    
     <div id="content">
         <div class="loading">Veriler Yükleniyor...</div>
     </div>
@@ -24,6 +42,10 @@
     <script>
         // GOOGLE TABLO'DAN ALDIĞIN CSV LİNKİNİ BURAYA YAPIŞTIR
         const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSKxcLVGnMYuLIWPfURRcgPieontqhuhF4lmKC5LNtG8tTxw0RlWZVceHivhaNmq0awB3t80JdWwGxn/pub?gid=594982577&single=true&output=csv";
+
+        // TOPLAMINI ALMAK İSTEDİĞİN SÜTUNUN İNDEKSİ
+        // A=0, B=1, C=2, D=3, E=4
+        const toplanacakSutunIndex = 3; 
 
         function getParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -65,19 +87,28 @@
                 if (rows.length < 1) throw new Error("Boş veri");
 
                 let html = '<table><thead><tr>';
-                // Başlıklar: A ve B'yi atlayıp C'den başlıyoruz (index 2)
                 for (let i = 2; i < rows[0].length; i++) {
                     html += `<th>${rows[0][i]}</th>`;
                 }
                 html += '</tr></thead><tbody>';
 
                 let found = false;
+                let toplamSayi = 0; // Matematik toplayıcımız
+
                 for (let j = 1; j < rows.length; j++) {
                     if (rows[j][1]?.toLowerCase() === userEmail) {
                         found = true;
                         html += '<tr>';
                         for (let k = 2; k < rows[j].length; k++) {
-                            html += `<td>${rows[j][k] || "-"}</td>`;
+                            let hucreDegeri = rows[j][k] || "-";
+                            html += `<td>${hucreDegeri}</td>`;
+                            
+                            // Belirlenen sütundaysak toplama ekle
+                            if (k === toplanacakSutunIndex && hucreDegeri !== "-") {
+                                // Virgülü noktaya çevirip küsuratlı rakamları düzeltir
+                                let temizSayi = hucreDegeri.replace(/\./g, "").replace(",", ".");
+                                toplamSayi += parseFloat(temizSayi) || 0;
+                            }
                         }
                         html += '</tr>';
                     }
@@ -87,6 +118,8 @@
                 if (!found) {
                     document.getElementById('content').innerHTML = '<div class="error">Kayıtlı veri bulunamadı.</div>';
                 } else {
+                    // Skor tabelasını ekrana bas
+                    document.getElementById('toplam-alani').innerHTML = `<div class="toplam-kutu">Toplam: ${toplamSayi}</div>`;
                     document.getElementById('content').innerHTML = html;
                 }
             } catch (err) {
