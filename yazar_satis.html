@@ -120,7 +120,7 @@
                 } else {
                     // Skor tabelasını ekrana bas (TL Formatlı)
                     let formatliPara = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplamSayi);
-                    document.getElementById('toplam-alani').innerHTML = `<div class="toplam-kutu">Toplam: ${formatliPara}</div>`;
+                    document.getElementById('toplam-alani').innerHTML = `<div class="toplam-kutu">TOPLAM KAZANCINIZ: ${formatliPara}</div>`;
                     document.getElementById('content').innerHTML = html;
                 }
             } catch (err) {
