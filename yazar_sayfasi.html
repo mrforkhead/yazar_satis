@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yazar Sayfanıza Yönlendiriliyorsunuz...</title>
+    <style>
+        /* Ekranı bomboş ve bembeyaz tutuyoruz ki hız hissi versin */
+        body { margin: 0; padding: 0; background-color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .loading-text { font-family: sans-serif; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="loading-text">Profiliniz yükleniyor...</div>
+
+    <script>
+        // GİRİŞ/YAZAR LİSTESİ TABLONUN CSV LİNKİNİ BURAYA YAPIŞTIR
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQcJ54wOud4M_2ye5YSBNl8pqD-MJTi1-NKv0KKj8mthRPuhhZeY87PJRdv4BeNnJ9caZOyfJr34xhy/pub?gid=0&single=true&output=csv";
+
+        function getParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        async function fastRedirect() {
+            const userEmail = getParam('yazar_maili')?.toLowerCase().trim();
+            if (!userEmail) {
+                document.body.innerHTML = "Yetkisiz erişim: Mail adresi bulunamadı.";
+                return;
+            }
+
+            try {
+                const response = await fetch(csvUrl);
+                const text = await response.text();
+                
+                // CSV satırlarını parçala
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+                const rows = lines.map(line => line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+
+                let targetUrl = "";
+                // B sütunu (1) Mail, C sütunu (2) Web Sitesi Linki
+                for (let i = 1; i < rows.length; i++) {
+                    const rowMail = rows[i][1]?.replace(/"/g, '').toLowerCase().trim();
+                    if (rowMail === userEmail) {
+                        targetUrl = rows[i][2]?.replace(/"/g, '').trim();
+                        break;
+                    }
+                }
+
+                if (targetUrl) {
+                    // Sayfayı geçmişe kaydetmeden direkt değiştir
+                    window.location.replace(targetUrl);
+                } else {
+                    document.body.innerHTML = "Yazar profil linki sistemde tanımlı değil.";
+                }
+            } catch (err) {
+                document.body.innerHTML = "Bağlantı hatası: Bilgiler çekilemedi.";
+            }
+        }
+
+        fastRedirect();
+    </script>
+</body>
+</html>
