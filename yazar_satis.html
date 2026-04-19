@@ -118,8 +118,9 @@
                 if (!found) {
                     document.getElementById('content').innerHTML = '<div class="error">Kayıtlı veri bulunamadı.</div>';
                 } else {
-                    // Skor tabelasını ekrana bas
-                    document.getElementById('toplam-alani').innerHTML = `<div class="toplam-kutu">Toplam: ${toplamSayi}</div>`;
+                    // Skor tabelasını ekrana bas (TL Formatlı)
+                    let formatliPara = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplamSayi);
+                    document.getElementById('toplam-alani').innerHTML = `<div class="toplam-kutu">Toplam: ${formatliPara}</div>`;
                     document.getElementById('content').innerHTML = html;
                 }
             } catch (err) {
